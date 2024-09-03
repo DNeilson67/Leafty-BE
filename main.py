@@ -40,7 +40,7 @@ verifier = BasicVerifier(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.environ.get("ORIGINS"),
+    allow_origins=["http://localhost:5173", "http://localhost:8000", "https://leafty-be.vercel.app", "https://leafty.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
