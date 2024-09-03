@@ -24,6 +24,9 @@ from datetime import datetime, timedelta
 import smtplib
 from dotenv import load_dotenv
 import os
+
+load_dotenv()
+
 app = FastAPI()
 
 backend = InMemoryBackend[UUID, SessionData]()
@@ -37,7 +40,7 @@ verifier = BasicVerifier(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ORIGINS"),
+    allow_origins=os.environ.get("ORIGINS"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -136,9 +139,8 @@ def generate_otp(request: schemas.GenerateOTPRequest, db: Session = Depends(get_
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
 
-    load_dotenv()
-    USER_EMAIL = os.getenv("EMAIL")
-    USER_PASSWORD = os.getenv("PASSWORD")
+    USER_EMAIL = os.environ.get("EMAIL")
+    USER_PASSWORD = os.environ.get("PASSWORD")
     
     server.login(USER_EMAIL, USER_PASSWORD)
 
