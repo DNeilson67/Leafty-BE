@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
 
 SQLALCHEMY_DATABASE_URL = "postgresql://default:z1puxRB8mwnk@ep-falling-pond-a1rnz83n.ap-southeast-1.aws.neon.tech:5432/verceldb?sslmode=require"
 

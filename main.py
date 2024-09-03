@@ -24,9 +24,6 @@ from datetime import datetime, timedelta
 import smtplib
 from dotenv import load_dotenv
 import os
-
-load_dotenv()
-
 app = FastAPI()
 
 backend = InMemoryBackend[UUID, SessionData]()
@@ -139,8 +136,9 @@ def generate_otp(request: schemas.GenerateOTPRequest, db: Session = Depends(get_
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
 
-    USER_EMAIL = os.environ.get("EMAIL")
-    USER_PASSWORD = os.environ.get("PASSWORD")
+    load_dotenv()
+    USER_EMAIL = os.getenv("EMAIL")
+    USER_PASSWORD = os.getenv("PASSWORD")
     
     server.login(USER_EMAIL, USER_PASSWORD)
 
@@ -200,17 +198,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 @app.get("/user/get", response_model=List[schemas.User], tags=["Users"])
-def get_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    print(f"Fetching users with skip={skip}, limit={limit}")
-    users = crud.get_users(db, skip=skip, limit=limit)
-    print(f"Fetched {len(users)} users")
+def get_users(limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, limit=limit)
     return users
-
-@app.get("/user/count", response_model=int, tags=["Users"])
-def get_user_count(db: Session = Depends(get_db)):
-    count = crud.get_user_count(db)
-    print(f"Total user count: {count}")
-    return count
 
 @app.get("/user/get_role/{role_id}", response_model=List[schemas.User], tags=["Users"])
 def get_user(role_id: int, db: Session = Depends(get_db)):
@@ -267,7 +257,7 @@ def update_user_role(user_id: str, role_update: schemas.UserRoleUpdate, db: Sess
         "Harbor": 2,
         "Company": 3,
         "Admin": 4,
-        "Customer": 5,
+        "Unverified": 5,
         "Rejected": 6
     }
     role_id = role_name_to_id.get(role_update.RoleName)
@@ -625,57 +615,3 @@ def get_shipment_flour_associations(db: Session = Depends(get_db)):
 
 if __name__ == '__main__':
     uvicorn.run("main:app", host = "0.0.0.0", reload=True)
-    
-    
-#marketplace
-@app.post("/settings/", response_model=schemas.SettingsBase, tags=["Settings"])
-def create_settings(settings: schemas.SettingsBase, db: Session = Depends(get_db)):
-    return crud.create_settings(db=db, settings=settings)
-
-@app.get("/settings/", response_model=List[schemas.SettingsResponse], tags=["Settings"])
-def get_settings(limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_settings(db=db, limit=limit)
-
-@app.get("/settings/{settings_id}", response_model=schemas.SettingsResponse, tags=["Settings"])
-def get_settings_by_id(settings_id: int, db: Session = Depends(get_db)):
-    db_settings = crud.get_settings_by_id(db=db, Settings_id=settings_id)
-    if not db_settings:
-        raise HTTPException(status_code=404, detail="Settings not found")
-    return db_settings
-
-@app.get("/settings/user/{user_id}", response_model=List[schemas.SettingsResponse], tags=["Settings"])
-def get_settings_by_user_id(user_id: str, db: Session = Depends(get_db)):
-    db_settings = crud.get_settings_by_user_id(db=db, user_id=user_id)
-    if not db_settings:
-        raise HTTPException(status_code=404, detail="Settings not found for the given user ID")
-    return db_settings
-
-@app.put("/settings/{settings_id}", response_model=schemas.SettingsResponse, tags=["Settings"])
-def update_settings(settings_id: int, settings: schemas.SettingsUpdate, db: Session = Depends(get_db)):
-    updated_settings = crud.update_settings(db=db, settings_id=settings_id, settings_update=settings)
-    if not updated_settings:
-        raise HTTPException(status_code=404, detail="Settings not found")
-    return updated_settings
-    
-
-@app.post("/admin_settings/post", response_model=schemas.AdminSettingBase, tags=["admin_settings"])
-def create_admin_settings(admin_settings: schemas.AdminSettingBase, db: Session = Depends(get_db)):
-    return crud.create_admin_settings(db=db, admin_settings= admin_settings)
-
-@app.get("/admin_settings/get", response_model=List[schemas.AdminSettingBase], tags=["admin_settings"])
-def get_settings(limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_admin_settings(db=db, limit=limit)
-
-@app.get("/admin_settings/{admin_settings_id}", response_model=schemas.AdminSettingBase, tags=["admin_settings"])
-def get_admin_settings_by_id(admin_settings_id: int, db: Session = Depends(get_db)):
-    db_settings = crud.get_admin_settings(db=db, admin_settings_id=admin_settings_id)
-    if not db_settings:
-        raise HTTPException(status_code=404, detail="admin settings not found")
-    return db_settings
-
-@app.get("/admin_settings/update_settings/admin_settings_id", response_model=schemas.Shipment, tags=["Shipment"])
-def update_admin_fee(admin_settings_id: int, update_data: schemas.AdminSettingUpdate, db: Session = Depends(get_db)):
-    updated_admin_fee = crud.update_admin_setings(db=db, admin_settings_id=admin_settings_id, update_data=update_data)
-    if not updated_admin_fee:
-        raise HTTPException(status_code=404, detail="admin not found")
-    return updated_admin_fee
