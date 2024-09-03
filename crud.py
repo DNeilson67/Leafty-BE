@@ -62,8 +62,15 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user_by_role(db: Session, RoleID: int):
     return db.query(models.User).filter(models.User.RoleID == RoleID).all()
 
-def get_users(db: Session, limit: int = 100):
-    return db.query(models.User).limit(limit).all()
+def get_users(db: Session, skip: int = 0, limit: int = 10):
+    users = db.query(models.User).offset(skip).limit(limit).all()
+    print(f"Retrieved {len(users)} users from database")
+    return users
+
+def get_user_count(db: Session):
+    count = db.query(models.User).count()
+    print(f"Total user count in database: {count}")
+    return count
 
 def get_user_by_id(db: Session, user_id: str):
     return db.query(models.User).filter(cast(models.User.UserID, UUID) == user_id).first()
@@ -98,7 +105,7 @@ def admin_update_user(db: Session, user_id: uuid.UUID, user_update: schemas.Admi
         "Harbor": 2,
         "Company": 3,
         "Admin": 4,
-        "Unverified": 5,
+        "Customer": 5,
         "Rejected": 6
     }
     role = role_name_to_id.get(user_update.RoleName)
@@ -697,3 +704,62 @@ def delete_location_by_id(db: Session, location_id: int):
         db.commit()
         return True
     return False
+
+
+#marketplace
+def create_settings(db: Session, settings: schemas.SettingsBase):
+    db_settings = models.Settings(**settings.dict())
+    db.add(db_settings)
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings
+
+def get_settings(db: Session, limit: int = 100):
+    return db.query(models.Settings).limit(limit).all()
+
+def get_settings_by_id(db: Session, Settings_id: int):
+    return db.query(models.Settings).filter(models.Settings.SettingsID == Settings_id).first()
+
+def get_settings_by_user_id(db: Session, user_id: str):
+    return db.query(models.Settings).filter(cast(models.Settings.UserID, UUID) == user_id).all()
+    
+def update_settings(db: Session, settings_id: int, settings_update: schemas.SettingsBase):
+    db_settings = db.query(models.Settings).filter(models.Settings.SettingsID == settings_id).first()
+    if not db_settings:
+        return None
+    for key, value in settings_update.dict().items():
+        setattr(db_settings, key, value)
+    db.commit
+    db.refresh(db_settings)
+    return db_settings
+
+def create_admin_settings(db: Session, settings: schemas.AdminSettingBase):
+    db_admin_settings = models.AdminSetting(**settings.dict())
+    db.add(db_admin_settings)
+    db.commit()
+    db.refresh(db_admin_settings)
+    return db_admin_settings
+
+def get_admin_settings(db: Session, limit: int = 100):
+    return db.query(models.AdminSetting).limit(limit).all()
+
+def get_settings_by_id(db: Session, AdminSettingID: int):
+    return db.query(models.AdminSetting).filter(models.AdminSetting.AdminSettingID == AdminSettingID).first()
+
+def update_admin_setings(db: Session, admin_settings_id: int, admin_setting_update: schemas.AdminSettingBase):
+    db_admin_settings = db.query(models.AdminSetting).filter(models.AdminSetting.AdminSettingsID == admin_settings_id).first()
+    if not db_admin_settings:
+        return None
+    for key, value in admin_setting_update.dict().items():
+        setattr(db_admin_settings,key, value)
+    db.commit
+    db.refresh(db_admin_settings)
+    return db_admin_settings
+
+def delete_admin_setting(db: Session, admin_settings_id: int):
+    db_admin_settings = db.query(models.AdminSetting).filter(models.AdminSetting.AdminSettingsID == admin_settings_id).first()
+    if not db_admin_settings:
+        return None  
+    db.delete(db_admin_settings)
+    db.commit()
+    return db_admin_settings

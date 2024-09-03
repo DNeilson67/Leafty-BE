@@ -104,3 +104,66 @@ class Shipment(Base):
     Centra_Reception_File = Column(Boolean,nullable=True)
     
     flours = relationship("Flour", secondary=shipment_flour_association, backref="shipments")
+    
+ # marketplace shenanigans
+
+class AdminSetting(Base):
+    __tablename__ = 'admin_settings'
+    
+    AdminSettingsID = Column(Integer, primary_key=True)
+    AdminFee = Column(Integer, nullable=False)
+
+    # Relationship with Settings
+    settings = relationship("Settings", back_populates="admin_settings")
+
+
+class WetLeavesDiscount(Base):
+    __tablename__ = 'wet_leaves_discount'
+    
+    WetLeavesDiscountID = Column(Integer, primary_key=True)
+    WetLeavesDiscountRate = Column(Integer, nullable=False)
+    WetLeavesExpirationCondition = Column(String, nullable=False)
+
+    # Relationship with Settings
+    settings = relationship("Settings", back_populates="wet_leaves_discount")
+
+
+class DryLeavesDiscount(Base):
+    __tablename__ = 'dry_leaves_discount'
+    
+    DryLeavesDiscountID = Column(Integer, primary_key=True)
+    DryLeavesDiscountRate = Column(Integer, nullable=False)
+    DryLeavesExpirationCondition = Column(String, nullable=False)
+
+    # Relationship with Settings
+    settings = relationship("Settings", back_populates="dry_leaves_discount")
+
+
+class PowderDiscount(Base):
+    __tablename__ = 'powder_discount'
+    
+    PowderDiscountID = Column(Integer, primary_key=True)
+    PowderDiscountRate = Column(Integer, nullable=False)
+    PowderExpirationCondition = Column(String, nullable=False)
+
+    # Relationship with Settings
+    settings = relationship("Settings", back_populates="powder_discount")
+
+
+class Settings(Base):
+    __tablename__ = 'settings'
+    
+    SettingsID = Column(Integer, primary_key=True)
+    WetLeavesPrice = Column(Integer, nullable=False, default=15.000)
+    DryLeavesPrice = Column(Integer, nullable=False)
+    PowderPrice = Column(Integer, nullable=False)
+    WetLeavesDiscountID = Column(Integer, ForeignKey('wet_leaves_discount.WetLeavesDiscountID'), nullable=False)
+    DryLeavesDiscountID = Column(Integer, ForeignKey('dry_leaves_discount.DryLeavesDiscountID'), nullable=False)
+    PowderDiscountID = Column(Integer, ForeignKey('powder_discount.PowderDiscountID'), nullable=False)
+    AdminSettingsID = Column(Integer, ForeignKey('admin_settings.AdminSettingsID'), nullable=True)
+
+    # Relationships with the other tables
+    wet_leaves_discount = relationship("WetLeavesDiscount", back_populates="settings")
+    dry_leaves_discount = relationship("DryLeavesDiscount", back_populates="settings")
+    powder_discount = relationship("PowderDiscount", back_populates="settings")
+    admin_settings = relationship("AdminSetting", back_populates="settings")
