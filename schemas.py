@@ -225,3 +225,162 @@ class ShipmentFlourAssociation(ShipmentFlourAssociationBase):
 
     class Config:
         orm_mode = True
+        
+        
+# marketplace stuff
+
+# Base model for AdminSettings
+class AdminSettingsBase(BaseModel):
+    AdminFeeValue: float
+
+class AdminSettingsCreate(AdminSettingsBase):
+    pass
+
+class AdminSettings(AdminSettingsBase):
+    AdminSettingsID: int
+
+    class Config:
+        orm_mode = True
+
+
+
+# Base model for Products
+class ProductsBase(BaseModel):
+    ProductName: str
+
+class ProductsCreate(ProductsBase):
+    pass
+
+class Products(ProductsBase):
+    ProductID: int
+
+    class Config:
+        orm_mode = True
+
+# Base model for CentraInitialPrice
+class CentraInitialPriceBase(BaseModel):
+    UserID: UUID4
+    ProductID: int
+    InitialPrice: float
+
+class CentraInitialPriceCreate(CentraInitialPriceBase):
+    pass
+
+class CentraInitialPrice(CentraInitialPriceBase):
+    InitialPriceID: int
+    products: Optional[Products]  # Relationship with Products model
+
+    class Config:
+        orm_mode = True
+
+# Base model for CentraSettingDetail
+class CentraSettingDetailBase(BaseModel):
+    UserID: UUID4
+    ProductID: int
+    DiscountConditionID: int
+
+class CentraSettingDetailCreate(CentraSettingDetailBase):
+    pass
+
+class CentraSettingDetail(CentraSettingDetailBase):
+    SettingDetailID: int
+    products: Optional[Products]  # Relationship with Products model
+    discount_condition: Optional["DiscountCondition"]  # Relationship with DiscountCondition model
+
+    class Config:
+        orm_mode = True
+
+# Base model for DiscountCondition
+class DiscountConditionBase(BaseModel):
+    DiscountRate: int
+    ExpDayLeft: int
+
+class DiscountConditionCreate(DiscountConditionBase):
+    pass
+
+class DiscountCondition(DiscountConditionBase):
+    DiscountConditionID: int
+
+    class Config:
+        orm_mode = True
+        
+class MarketShipmentBase(BaseModel):
+    CentraID: UUID4
+    CustomerID: UUID4
+    DryLeavesID: int
+    PowderID: int
+    status: str
+
+class MarketShipmentCreate(MarketShipmentBase):
+    pass
+
+class MarketShipmentUpdate(BaseModel):
+    CentraID: Optional[UUID4] = None
+    CustomerID: Optional[UUID4] = None
+    DryLeavesID: Optional[int] = None
+    PowderID: Optional[int] = None
+    status: Optional[str] = None
+
+class MarketShipment(MarketShipmentBase):
+    MarketShipmentID: int
+
+    class Config:
+        orm_mode = True
+
+class SubTransactionBase(BaseModel):
+    MarketShipmentID: int
+    status: str
+
+class SubTransactionCreate(SubTransactionBase):
+    pass
+
+class SubTransactionUpdate(BaseModel):
+    MarketShipmentID: Optional[int] = None
+    status: Optional[str] = None
+
+class SubTransaction(SubTransactionBase):
+    SubTransactionID: int
+
+    class Config:
+        orm_mode = True
+
+from pydantic import BaseModel
+from typing import Optional
+
+# TransactionCreate schema
+class TransactionCreate(BaseModel):
+    SubTransactionID: int
+    status: str
+
+# TransactionUpdate schema
+class TransactionUpdate(BaseModel):
+    SubTransactionID: Optional[int] = None
+    status: Optional[str] = None
+
+# Transaction schema (for returning Transaction data)
+class Transaction(BaseModel):
+    TransactionID: int
+    SubTransactionID: int
+    status: str
+    
+    class Config:
+        orm_mode = True
+
+#xendit
+class InvoiceRequest(BaseModel):
+    external_id: str
+    amount: int
+    payer_email: str
+    description: str
+    success_redirect_url: str
+    failure_redirect_url: str
+
+class CityCreate(BaseModel):
+    key: str
+    name: str
+    lat: float
+    lng: float
+
+class City(CityCreate):
+    class Config:
+        orm_mode = True

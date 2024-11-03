@@ -43,6 +43,7 @@ class User(Base):
     Password = Column(String(100))
     RoleID = Column(Integer, ForeignKey('roles.RoleID'))
     role = relationship("RoleModel")
+    
 
 class Location(Base):
     __tablename__ = "locations"
@@ -104,3 +105,90 @@ class Shipment(Base):
     Centra_Reception_File = Column(Boolean,nullable=True)
     
     flours = relationship("Flour", secondary=shipment_flour_association, backref="shipments")
+   
+   
+#marketplace 
+
+class AdminSettings(Base):
+    __tablename__ = "admin_settings"
+
+    AdminSettingsID = Column(Integer, primary_key=True, autoincrement=True)
+    AdminFeeValue = Column(Float, nullable=False)
+
+
+class Products(Base):
+    __tablename__ = "products_templates"
+
+    ProductID = Column(Integer, primary_key=True, autoincrement=True)
+    ProductName = Column(String(100), nullable=False)
+
+class CentraInitialPrice(Base):
+    __tablename__ = "centra_initial_prices"
+
+    InitialPriceID = Column(Integer, primary_key=True, autoincrement=True)
+    UserID = Column(String(36), ForeignKey("users.UserID"))
+    ProductID = Column(Integer, ForeignKey("products_templates.ProductID"))
+    InitialPrice = Column(Float, nullable=False)
+
+    products_templates = relationship("Products", backref="initial_prices")
+
+class CentraSettingDetail(Base):
+    __tablename__ = "centra_setting_details"
+
+    SettingDetailID = Column(Integer, primary_key=True, autoincrement=True)
+    UserID = Column(String(36), ForeignKey("users.UserID"))
+    ProductID = Column(Integer, ForeignKey("products_templates.ProductID"))
+    DiscountConditionID = Column(Integer, ForeignKey("discount_condition.DiscountConditionID"))
+
+    products_templates = relationship("Products", backref="setting_details")
+    discount_condition = relationship("DiscountCondition", backref="setting_details")
+
+class DiscountCondition(Base):
+    __tablename__ = "discount_condition"
+    
+    DiscountConditionID = Column(Integer, primary_key=True, autoincrement=True)
+    DiscountRate = Column(Integer)
+    ExpDayLeft = Column(Integer)
+    
+    
+class MarketShipment(Base):
+    __tablename__ = "market_shipment"
+    
+    MarketShipmentID = Column(Integer, primary_key=True, autoincrement=True)
+    CentraID = Column(String(36), ForeignKey('users.UserID'))  
+    CustomerID = Column(String(36), ForeignKey('users.UserID'))  
+    DryLeavesID = Column(Integer, ForeignKey('dry_leaves.DryLeavesID'))
+    PowderID = Column(Integer, ForeignKey('flour.FlourID'))
+    status = Column(String)
+    
+class SubTransaction(Base):
+    __tablename__ = "sub_transaction"
+    
+    SubTransactionID = Column(Integer, primary_key=True, autoincrement=True)
+    MarketShipmentID = Column(Integer, ForeignKey("market_shipment.MarketShipmentID"))
+    status = Column(String)
+
+    # Relationship to Transaction model
+    transactions = relationship("Transaction", back_populates="sub_transaction")
+
+class Transaction(Base):
+    __tablename__ = "transaction"
+    
+    TransactionID = Column(Integer, primary_key=True, autoincrement=True)
+    SubTransactionID = Column(Integer, ForeignKey("sub_transaction.SubTransactionID"))
+    status = Column(String)
+    
+    # Relationship to SubTransaction model
+    sub_transaction = relationship("SubTransaction", back_populates="transactions")
+
+
+# Transaction Table: TransactionID, SubTransactionID, s
+
+
+class IndonesianCity(Base):
+    __tablename__ = "indonesian_cities"
+
+    key = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
