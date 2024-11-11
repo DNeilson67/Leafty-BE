@@ -1008,6 +1008,15 @@ def create_city(db: Session, city: schemas.CityCreate):
 def get_all_cities(db: Session):
     return db.query(models.IndonesianCity).all()
 
+def get_centra_cities(db: Session):
+    return (
+        db.query(models.IndonesianCity)
+        .join(models.User)
+        .join(models.RoleModel)
+        .filter(models.RoleModel.RoleName == "Centra")  
+        .all()
+    )
+
 
 # def create_admin_settings(db: Session, admin_settings: schemas.AdminSettingsCreate):
 #     db_admin_settings = models.AdminSettings(**admin_settings.dict())

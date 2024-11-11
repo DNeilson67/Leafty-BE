@@ -43,8 +43,9 @@ class User(Base):
     Password = Column(String(100))
     RoleID = Column(Integer, ForeignKey('roles.RoleID'))
     role = relationship("RoleModel")
-    
+    cities = relationship("IndonesianCity", back_populates="user")
 
+    
 class Location(Base):
     __tablename__ = "locations"
 
@@ -187,8 +188,9 @@ class Transaction(Base):
 
 class IndonesianCity(Base):
     __tablename__ = "indonesian_cities"
+    user_id = Column(String, ForeignKey("users.UserID"), primary_key=True)
+    name = Column(String, nullable=True)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
 
-    key = Column(String, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    lat = Column(Float, nullable=False)
-    lng = Column(Float, nullable=False)
+    user = relationship("User", back_populates="cities")

@@ -875,9 +875,8 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
 
 # Map Cities
 @app.get("/cities", response_model=List[schemas.City])
-def read_cities(db: Session = Depends(get_db)):
-    return crud.get_all_cities(db)
-
+def read_centra_cities(db: Session = Depends(get_db)):
+    return crud.get_centra_cities(db)
 
 
 # @app.post("/admin_settings/", response_model=schemas.AdminSettings)

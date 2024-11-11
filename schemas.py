@@ -383,12 +383,18 @@ class InvoiceRequest(BaseModel):
     success_redirect_url: str
     failure_redirect_url: str
 
-class CityCreate(BaseModel):
-    key: str
+class CityBase(BaseModel):
+    user_id: str
     name: str
-    lat: float
-    lng: float
+    lat: Optional[float]
+    lng: Optional[float]
 
-class City(CityCreate):
     class Config:
-        orm_mode = True
+        orm_mode = True 
+
+class CityCreate(CityBase):
+    pass  
+
+
+class City(CityBase):
+    user: Optional[User] 
