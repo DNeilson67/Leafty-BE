@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Response, status
+from fastapi import FastAPI, HTTPException, Depends, Request, Response, status, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
@@ -16,7 +16,7 @@ import models
 import schemas
 from schemas import InvoiceRequest
 import bcrypt
-from typing import List
+from typing import List, Union, Dict
 from database import SessionLocal, engine
 from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
 from fastapi_sessions.session_verifier import SessionVerifier
@@ -998,3 +998,12 @@ def read_cities(db: Session = Depends(get_db)):
 #     if not success:
 #         raise HTTPException(status_code=404, detail="Setting detail not found")
 #     return {"detail": "Setting detail deleted successfully"}
+
+
+@app.get("/items/", response_model=Dict[str, List[Union[schemas.SimpleFlour, schemas.SimpleDryLeaves]]])
+def read_items(item_type: str, limit: int = 100, db: Session = Depends(get_db)):
+    try:
+        items = crud.get_items(db, item_type=item_type, limit=limit)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return items

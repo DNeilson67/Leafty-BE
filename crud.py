@@ -1172,3 +1172,41 @@ def get_all_cities(db: Session):
 #         db.commit()
 #         return True
 #     return False
+
+from itertools import groupby
+from operator import itemgetter
+
+def get_items(db: Session, item_type: str, limit: int = 100):
+    # Fetch data based on item type
+    if item_type.lower() == 'flour':
+        items = db.query(models.Flour).limit(limit).all()
+    elif item_type.lower() == 'dry_leaves':
+        items = db.query(models.DryLeaves).limit(limit).all()
+    else:
+        raise ValueError("Invalid item type. Choose 'flour' or 'dry_leaves'.")
+
+    # Initialize the dictionary to group items by username
+    grouped_data = {}
+
+    # Iterate through each item to populate grouped_data
+    for item in items:
+        user_id = item.UserID  # Assuming each item has a 'UserID' attribute
+        user = get_user_by_id(db, user_id)
+        if not user:
+            continue
+
+        username = user.Username
+
+        # Check item type to determine structure
+        if item_type.lower() == 'dry_leaves':
+            item_data = {"id": item.DryLeavesID, "weight": item.Processed_Weight}
+        elif item_type.lower() == 'flour':
+            item_data = {"id": item.FlourID, "weight": item.Flour_Weight}
+       
+        # Group by username
+        if username not in grouped_data:
+            grouped_data[username] = [item_data]
+        else:
+            grouped_data[username].append(item_data)
+
+    return grouped_data

@@ -100,6 +100,10 @@ class Courier(CourierBase):
     class Config:
         orm_mode = True
 
+class SimpleDryLeaves(BaseModel):
+    id: int
+    weight: float
+
 class DryLeavesBase(BaseModel):
     UserID: UUID4
     WetLeavesID: int
@@ -145,6 +149,10 @@ class WetLeavesUpdate(BaseModel):
     
 class WetLeavesStatusUpdate(BaseModel):
     Status: str
+
+class SimpleFlour(BaseModel):
+    id: int
+    weight: float
 
 class FlourBase(BaseModel):
     UserID: UUID4
